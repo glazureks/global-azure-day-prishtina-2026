@@ -18,7 +18,7 @@ body {
 }
 
 /* Navigation Header */
-.navbar {
+.site-navbar {
     background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -29,7 +29,7 @@ body {
     border-bottom: 1px solid rgba(0, 120, 212, 0.14);
 }
 
-.navbar::after {
+.site-navbar::after {
     content: '';
     position: absolute;
     left: 0;
@@ -54,6 +54,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    text-decoration: none;
 }
 
 .navbar-logo {
@@ -464,6 +465,9 @@ body {
     width: 100%;
     height: auto;
     display: block;
+    background: #0A3A7A;
+    padding: 8px 14px;
+    border-radius: 8px;
 }
 
 .about-section p {
@@ -858,13 +862,8 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar-container {
-        flex-direction: column;
         height: auto;
-        padding: 15px 20px;
-    }
-
-    .navbar-logo-section {
-        margin-bottom: 15px;
+        padding: 12px 20px;
     }
 
     .navbar-logo {
@@ -875,11 +874,33 @@ body {
         font-size: 18px;
     }
 
-    .nav-menu {
-        gap: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 15px;
+    .site-navbar .navbar-toggler {
+        border: 1px solid rgba(0, 120, 212, 0.35);
+        padding: 6px 9px;
+    }
+
+    .site-navbar .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 120, 212, 0.2);
+    }
+
+    .site-navbar .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 99, 177, 0.95%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    .site-navbar .navbar-collapse {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(0, 120, 212, 0.18);
+    }
+
+    .site-navbar .nav-menu {
+        gap: 6px;
+        align-items: flex-start;
+    }
+
+    .site-navbar .nav-link {
+        padding: 8px 0;
+        font-size: 15px;
     }
 
     .hero h1 {
@@ -985,6 +1006,11 @@ body {
 
     .about-logo {
         max-width: 220px;
+    }
+
+    .aaug-logo {
+        max-width: 220px;
+        padding: 8px 12px;
     }
 
     .schedule-grid {
