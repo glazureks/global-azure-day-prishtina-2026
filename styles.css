@@ -617,8 +617,9 @@ body {
 
 .schedule-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
+    justify-content: center;
 }
 
 .schedule-item {
@@ -953,6 +954,7 @@ body {
 
     .schedule-grid {
         grid-template-columns: repeat(3, 1fr);
+        justify-items: center;
     }
 
     .footer-grid {
@@ -1015,6 +1017,7 @@ body {
 
     .schedule-grid {
         grid-template-columns: repeat(2, 1fr);
+        justify-items: center;
     }
 
     .footer-logo {
