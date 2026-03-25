@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Azure Day Prishtina 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,32 +31,44 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Global Azure Prishtina 2026</h1>
+            <p class="hero-subtitle">Part of the Global Azure Event</p>
+          
             <p class="community-tagline">BY THE COMMUNITY | FOR THE COMMUNITY</p>
             <p class="first-time">FOR THE FIRST TIME IN KOSOVO</p>
-            <p>Join us for an exciting day of cloud innovation, cutting-edge Azure technologies, and networking with industry experts.</p>
-            <div class="countdown-wrapper" aria-live="polite">
-                <div class="countdown-title">Countdown to Event Start</div>
-                <div id="countdown" class="countdown">
-                    <div class="countdown-item"><span id="cd-days">00</span><small>Days</small></div>
-                    <div class="countdown-item"><span id="cd-hours">00</span><small>Hours</small></div>
-                    <div class="countdown-item"><span id="cd-minutes">00</span><small>Minutes</small></div>
-                    <div class="countdown-item"><span id="cd-seconds">00</span><small>Seconds</small></div>
-                </div>
-            </div>
+            <p>Join a worldwide community exploring Azure, AI, and cloud innovation—now live in Prishtina.</p>
+            <p class="hero-event-meta">📅 18 April 2026 | ⏰ 10:00 | 📍 ICK</p>
             <div class="hero-buttons">
-                <button class="btn btn-primary" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})"><img src="https://ickosovo.com/wp-content/uploads/2023/10/ick-white-mainlogo.svg" alt="Innovation Centre Kosovo" class="btn-icon">Learn More</button>
+                <a class="btn btn-primary" href="https://forms.gle/your-form-id" target="_blank" rel="noopener noreferrer">Register</a>
                 <button class="btn btn-secondary" onclick="document.getElementById('schedule').scrollIntoView({behavior: 'smooth'})">View Schedule</button>
+            </div>
+            <div class="hero-partners">
+                <span class="hero-partners-label">Organized &amp; Hosted by</span>
+                <div class="hero-partners-logos">
+                    
+                    <img src="img/aaug_transparentWHITE.png" alt="Albanian Azure User Group" class="hero-partner-logo" ><img src="https://ickosovo.com/wp-content/uploads/2023/10/ick-white-mainlogo.svg" alt="Innovation Centre Kosovo" class="hero-partner-logo">
+
+                    
+                </div>
             </div>
         </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="section about-section">
+    <section id="about" class="section about-section reveal">
         <div class="container">
-            <img src="img/globalazure2026.webp" alt="Global Azure Day 2026 Logo" class="about-logo">
-            <h2>About Global Azure Day</h2>
-            <p>Global Azure Day is an annual community event dedicated to Microsoft Azure and cloud technologies. Prishtina 2026 brings together developers, architects, and IT professionals to learn about the latest Azure innovations, best practices, and real-world applications.</p>
-            <div class="about-grid">
+            <div class="about-intro">
+                <div class="about-image">
+                    <img src="img/globalazure2026.webp" alt="Global Azure Day 2026 Logo" class="about-logo">
+                    <img src="img/AAUG white.png" alt="Albanian Azure User Group" class="aaug-logo">
+                </div>
+                <div class="about-content">
+                    <h2>🌍 About Global Azure Day</h2>
+                    <p>Global Azure Day is a worldwide community-driven event that brings together developers, IT professionals, and cloud enthusiasts to learn, connect, and explore the latest innovations in Microsoft Azure.</p>
+                    <p>Held across the globe between April 16-18, 2026, this event unites local communities in a shared mission: to share knowledge, showcase real-world solutions, and accelerate the adoption of cloud technologies.</p>
+                   <p>Global Azure Day is powered by passionate local communities, and in Prishtina, it is proudly organized by the Albanian Azure User Group, bringing this global experience to our region.</p>
+                </div>
+            </div>
+            <!-- <div class="about-grid">
                 <div class="about-card">
                     <h3>🚀 Innovation</h3>
                     <p>Discover the latest Azure services and cloud technologies</p>
@@ -66,40 +81,82 @@
                     <h3>📚 Learning</h3>
                     <p>Gain insights through expert talks and hands-on sessions</p>
                 </div>
-            </div>
+            </div> -->
         </div>
     </section>
 
     <!-- Speakers Section -->
-    <section id="speakers" class="section speakers-section">
+    <section id="speakers" class="section speakers-section reveal">
         <div class="container">
             <h2>Speakers</h2>
             <p>Learn from industry leaders and Azure experts</p>
             <div class="speakers-grid">
+                <!-- Speaker 1 -->
                 <div class="speaker-card">
-                    <div class="speaker-avatar">👨‍💼</div>
-                    <h3>Speaker Name</h3>
-                    <p class="speaker-title">Cloud Solutions Architect</p>
-                    <p class="speaker-bio">Expert in Azure infrastructure and cloud solutions</p>
+                    <div class="speaker-photo-wrap">
+                        <img src="img/speakers/speaker1.jpg" alt="Speaker Name" class="speaker-photo">
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-overlay-name">Speaker Name</span>
+                        <span class="speaker-overlay-title">Cloud Solutions Architect</span>
+                    </div>
                 </div>
+                <!-- Speaker 2 -->
                 <div class="speaker-card">
-                    <div class="speaker-avatar">👩‍💻</div>
-                    <h3>Speaker Name</h3>
-                    <p class="speaker-title">DevOps Engineer</p>
-                    <p class="speaker-bio">Specialist in CI/CD and Azure DevOps</p>
+                    <div class="speaker-photo-wrap">
+                        <img src="img/speakers/speaker2.jpg" alt="Speaker Name" class="speaker-photo">
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-overlay-name">Speaker Name</span>
+                        <span class="speaker-overlay-title">DevOps Engineer</span>
+                    </div>
                 </div>
+                <!-- Speaker 3 -->
                 <div class="speaker-card">
-                    <div class="speaker-avatar">👨‍🔬</div>
-                    <h3>Speaker Name</h3>
-                    <p class="speaker-title">AI & Data Scientist</p>
-                    <p class="speaker-bio">Leading expert in Azure AI and Machine Learning</p>
+                    <div class="speaker-photo-wrap">
+                        <img src="img/speakers/speaker3.jpg" alt="Speaker Name" class="speaker-photo">
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-overlay-name">Speaker Name</span>
+                        <span class="speaker-overlay-title">AI &amp; Machine Learning Expert</span>
+                    </div>
+                </div>
+                <!-- Speaker 4 -->
+                <div class="speaker-card">
+                    <div class="speaker-photo-wrap">
+                        <img src="img/speakers/speaker4.jpg" alt="Speaker Name" class="speaker-photo">
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-overlay-name">Speaker Name</span>
+                        <span class="speaker-overlay-title">Cloud Security Specialist</span>
+                    </div>
+                </div>
+                <!-- Speaker 5 -->
+                <div class="speaker-card">
+                    <div class="speaker-photo-wrap">
+                        <img src="img/speakers/speaker5.jpg" alt="Speaker Name" class="speaker-photo">
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-overlay-name">Speaker Name</span>
+                        <span class="speaker-overlay-title">Kubernetes &amp; Containers Expert</span>
+                    </div>
+                </div>
+                <!-- Speaker 6 -->
+                <div class="speaker-card">
+                    <div class="speaker-photo-wrap">
+                        <img src="img/speakers/speaker6.jpg" alt="Speaker Name" class="speaker-photo">
+                    </div>
+                    <div class="speaker-info">
+                        <span class="speaker-overlay-name">Speaker Name</span>
+                        <span class="speaker-overlay-title">Data &amp; Analytics Lead</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Schedule Section -->
-    <section id="schedule" class="section schedule-section">
+    <section id="schedule" class="section schedule-section reveal">
         <div class="container">
             <h2>Event Schedule</h2>
             <div class="schedule-grid">
@@ -138,10 +195,10 @@
     </section>
 
     <!-- Supporters Section -->
-    <section id="supporters" class="section supporters-section">
+    <section id="supporters" class="section supporters-section reveal">
         <div class="container">
             <h2>Our Supporters</h2>
-            <p>Global Azure Day Prishtina 2026 is made possible by our valued partners</p>
+            <p>Global Azure Day Prishtina 2026 is made possible by Albanian Azure User Group community</p>
             <p class="sponsorship-invitation"><strong>Interested in Sponsoring?</strong> We are actively seeking sponsors and partners to help us create an exceptional experience for our community. Become part of this historic inaugural event and connect with professional developers, architects, and cloud enthusiasts across Kosovo. Contact us to explore sponsorship opportunities tailored to your organization.</p>
             <!-- <div class="supporters-grid">
                 <div class="supporter-card">
@@ -165,7 +222,7 @@
     </section>
 
     <!-- Location Section -->
-    <section id="location" class="section location-section">
+    <section id="location" class="section location-section reveal">
         <div class="container">
             <h2>Event Location</h2>
             <div class="location-content">
@@ -187,51 +244,49 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Global Azure Day Prishtina. All rights reserved.</p>
-            <p>Follow us on social media for updates and announcements</p>
+        <div class="footer-main">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="img/globalazure2026.webp" alt="Global Azure Day" class="footer-logo">
+                    <p>Global Azure Day Prishtina 2026 &mdash; the first community-driven Azure event in Kosovo, organized by the Albanian Azure User Group.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="#about">About</a>
+                    <a href="#speakers">Speakers</a>
+                    <a href="#schedule">Schedule</a>
+                    <a href="#supporters">Supporters</a>
+                    <a href="#location">Location</a>
+                </div>
+                <div class="footer-info">
+                    <h4>Event Details</h4>
+                    <p>📅 18 April 2026</p>
+                    <p>🕐 10:00 &ndash; 15:00</p>
+                    <p>🏢 Innovation Centre Kosovo</p>
+                    <p>🗺️ Prishtina, Kosovo</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 Global Azure Day Prishtina. Organized by <a href="https://ickosovo.com" target="_blank" rel="noopener noreferrer">Albanian Azure User Group</a>. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
     <script>
+        // Scroll reveal
         (function () {
-            const eventTime = new Date('2026-04-18T10:00:00+01:00').getTime();
-            const daysEl = document.getElementById('cd-days');
-            const hoursEl = document.getElementById('cd-hours');
-            const minutesEl = document.getElementById('cd-minutes');
-            const secondsEl = document.getElementById('cd-seconds');
-            const countdownEl = document.getElementById('countdown');
-
-            function pad(value) {
-                return String(value).padStart(2, '0');
-            }
-
-            function updateCountdown() {
-                const now = Date.now();
-                const distance = eventTime - now;
-
-                if (distance <= 0) {
-                    daysEl.textContent = '00';
-                    hoursEl.textContent = '00';
-                    minutesEl.textContent = '00';
-                    secondsEl.textContent = '00';
-                    countdownEl.classList.add('countdown-complete');
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                daysEl.textContent = pad(days);
-                hoursEl.textContent = pad(hours);
-                minutesEl.textContent = pad(minutes);
-                secondsEl.textContent = pad(seconds);
-            }
-
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(function (el) {
+                observer.observe(el);
+            });
         })();
     </script>
 </body>
