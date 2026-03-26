@@ -118,7 +118,7 @@ body {
     background:
         radial-gradient(circle at 12% 18%, rgba(103, 232, 249, 0.3) 0%, rgba(103, 232, 249, 0) 35%),
         radial-gradient(circle at 88% 22%, rgba(59, 130, 246, 0.34) 0%, rgba(59, 130, 246, 0) 38%),
-        linear-gradient(135deg, #0B1220 0%, #0A3A7A 42%, #0EA5E9 100%);
+        linear-gradient(135deg, #0B1220  0%, #0A3A7A 42%, #0EA5E9 100%);
     color: white;
     padding: 120px 20px;
     text-align: center;
