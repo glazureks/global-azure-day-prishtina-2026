@@ -319,17 +319,40 @@ body {
 }
 
 .btn-primary {
-    background-color: transparent;
-    color: white;
-    border: 2px solid white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+    color: #ffffff;
+    border: 2px solid #6ee7b7;
+    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.42), 0 0 0 2px rgba(255, 255, 255, 0.22);
+    transform: translateY(0) scale(1);
+    animation: registerPulse 2.4s ease-in-out infinite;
 }
 
 .btn-primary:hover {
-    background-color: white;
-    color: #0063B1;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #34d399 0%, #38bdf8 100%);
+    color: #082f49;
+    border-color: #a7f3d0;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 14px 28px rgba(14, 165, 233, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.28);
+    animation-play-state: paused;
+}
+
+.btn-primary:focus-visible {
+    outline: 3px solid #86efac;
+    outline-offset: 3px;
+}
+
+.btn-primary:active {
+    transform: translateY(-1px) scale(1.01);
+}
+
+@keyframes registerPulse {
+    0%,
+    100% {
+        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.42), 0 0 0 2px rgba(255, 255, 255, 0.22);
+    }
+    50% {
+        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.58), 0 0 0 6px rgba(110, 231, 183, 0.26);
+    }
 }
 
 .btn-secondary {
