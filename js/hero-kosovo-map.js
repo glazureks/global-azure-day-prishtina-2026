@@ -5,10 +5,12 @@
 (function () {
     var VB_W = 612.56158;
     var VB_H = 696.99365;
-    var TARGET_POINTS = 125;
+    var TARGET_POINTS = 155;
     var MAX_EDGE_DIST = 50;
     var MAX_NEIGHBORS = 4;
-    var LINE_ALPHA = 0.22;
+    var LINE_ALPHA = 0.26;
+    /** Zoom past full bleed (cover) so the map reads clearly in the hero */
+    var COVER_ZOOM = 1.18;
 
     function loadPaths() {
         return fetch('img/kosovo.svg')
@@ -68,8 +70,8 @@
                 pts.push({
                     x: x,
                     y: y,
-                    r: 0.85 + Math.random() * 1.15,
-                    a: 0.36 + Math.random() * 0.48
+                    r: 0.95 + Math.random() * 1.25,
+                    a: 0.38 + Math.random() * 0.5
                 });
             }
         }
@@ -80,7 +82,7 @@
         var cw = ctx.canvas._cssW;
         var ch = ctx.canvas._cssH;
         var dpr = ctx.canvas.width / cw;
-        var scale = Math.min(cw / VB_W, ch / VB_H) * 0.9;
+        var scale = Math.max(cw / VB_W, ch / VB_H) * COVER_ZOOM;
         var tx = (cw - VB_W * scale) / 2;
         var ty = (ch - VB_H * scale) / 2;
 
@@ -97,7 +99,8 @@
         }
 
         ctx.strokeStyle = 'rgba(255,255,255,' + LINE_ALPHA + ')';
-        ctx.lineWidth = 0.32 / scale;
+        /* ~1.1px on screen regardless of cover zoom */
+        ctx.lineWidth = 1.12 / scale;
         ctx.lineCap = 'round';
 
         var drawn = {};
