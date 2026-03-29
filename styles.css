@@ -517,7 +517,7 @@ h3 {
 
 @media (prefers-reduced-motion: no-preference) {
     .hero-map-drift {
-        animation: hero-map-drift 12.5s ease-in-out infinite;
+        animation: hero-map-drift 16s ease-in-out infinite;
         animation-delay: 3.1s;
     }
 }
@@ -528,19 +528,19 @@ h3 {
     }
 }
 
-/* Starts centered, then pans wider left ↔ right (overflow clips at hero edges) */
+/* Starts centered, then pans farther left ↔ right (hero clips overflow) */
 @keyframes hero-map-drift {
     0%,
-    13% {
+    12% {
         transform: translate3d(0, 0, 0);
     }
-    38% {
-        transform: translate3d(8.5%, -0.12%, 0);
+    36% {
+        transform: translate3d(13.5%, -0.1%, 0);
     }
-    65% {
-        transform: translate3d(-8.5%, 0.1%, 0);
+    64% {
+        transform: translate3d(-13.5%, 0.1%, 0);
     }
-    90%,
+    88%,
     100% {
         transform: translate3d(0, 0, 0);
     }

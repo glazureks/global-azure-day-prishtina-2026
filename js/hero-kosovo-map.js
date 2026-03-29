@@ -5,10 +5,15 @@
 (function () {
     var VB_W = 612.56158;
     var VB_H = 696.99365;
-    var TARGET_POINTS = 168;
-    var MAX_EDGE_DIST = 48;
-    var MAX_NEIGHBORS = 5;
-    var LINE_ALPHA = 0.32;
+    /** Random fill points + one node per municipality path (city “hubs”) */
+    var TARGET_POINTS = 195;
+    var MAX_EDGE_DIST = 54;
+    var MAX_NEIGHBORS = 6;
+    var LINE_ALPHA = 0.34;
+    var LONG_EDGE_MIN = 56;
+    var LONG_EDGE_MAX = 128;
+    var LONG_EDGE_COUNT = 48;
+    var LONG_LINE_ALPHA = 0.17;
     /** Fraction of width/height reserved as empty space on each side (top, bottom, left, right) */
     var MARGIN_RATIO = 0.075;
 
@@ -78,7 +83,32 @@
         return pts;
     }
 
-    function drawScene(ctx, combined, points, pr, glowPulse, corePulse, ringT) {
+    function buildLongRangeEdges(points) {
+        var edges = [];
+        var seen = {};
+        var tries = 0;
+        var maxTries = 12000;
+        while (edges.length < LONG_EDGE_COUNT && tries < maxTries) {
+            tries++;
+            var i = Math.floor(Math.random() * points.length);
+            var j = Math.floor(Math.random() * points.length);
+            if (i === j) continue;
+            var a = i < j ? i : j;
+            var b = i < j ? j : i;
+            var key = a + ',' + b;
+            if (seen[key]) continue;
+            var dx = points[a].x - points[b].x;
+            var dy = points[a].y - points[b].y;
+            var d = Math.sqrt(dx * dx + dy * dy);
+            if (d >= LONG_EDGE_MIN && d <= LONG_EDGE_MAX) {
+                seen[key] = true;
+                edges.push([a, b]);
+            }
+        }
+        return edges;
+    }
+
+    function drawScene(ctx, combined, points, longEdges, pr, glowPulse, corePulse, ringT) {
         var cw = ctx.canvas._cssW;
         var ch = ctx.canvas._cssH;
         var dpr = ctx.canvas.width / cw;
@@ -96,24 +126,19 @@
         ctx.scale(scale, scale);
 
         if (combined) {
-            /* Country outline (lines only — no fill); mesh drawn inside clip */
-            ctx.strokeStyle = 'rgba(224, 245, 255, 0.58)';
-            ctx.lineWidth = 1.85 / scale;
+            /* Border: softer than inner mesh so network reads first */
+            ctx.strokeStyle = 'rgba(200, 230, 245, 0.22)';
+            ctx.lineWidth = 1.05 / scale;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
-            ctx.shadowColor = 'rgba(56, 189, 248, 0.42)';
-            ctx.shadowBlur = 5.5 / scale;
+            ctx.shadowColor = 'rgba(56, 189, 248, 0.12)';
+            ctx.shadowBlur = 2 / scale;
             ctx.stroke(combined);
             ctx.shadowBlur = 0;
 
             ctx.save();
             ctx.clip(combined);
         }
-
-        ctx.strokeStyle = 'rgba(255,255,255,' + LINE_ALPHA + ')';
-        ctx.lineWidth = 1.35 / scale;
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
 
         var drawn = {};
         function edgeKey(a, b) {
@@ -123,6 +148,22 @@
         var i;
         var j;
         var k;
+
+        /* Longer “link” segments (region-to-region), drawn fainter first */
+        ctx.strokeStyle = 'rgba(255,255,255,' + LONG_LINE_ALPHA + ')';
+        ctx.lineWidth = 1.02 / scale;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        for (i = 0; i < longEdges.length; i++) {
+            var le = longEdges[i];
+            ctx.beginPath();
+            ctx.moveTo(points[le[0]].x, points[le[0]].y);
+            ctx.lineTo(points[le[1]].x, points[le[1]].y);
+            ctx.stroke();
+        }
+
+        ctx.strokeStyle = 'rgba(255,255,255,' + LINE_ALPHA + ')';
+        ctx.lineWidth = 1.38 / scale;
         for (i = 0; i < points.length; i++) {
             var dists = [];
             for (j = 0; j < points.length; j++) {
@@ -148,9 +189,13 @@
         }
 
         for (i = 0; i < points.length; i++) {
+            var pradius = points[i].r;
+            if (points[i].hub) {
+                pradius = Math.max(pradius, 1.35);
+            }
             ctx.fillStyle = 'rgba(255,255,255,' + points[i].a + ')';
             ctx.beginPath();
-            ctx.arc(points[i].x, points[i].y, points[i].r, 0, Math.PI * 2);
+            ctx.arc(points[i].x, points[i].y, pradius, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -166,11 +211,11 @@
 
         var gx = pr.x;
         var gy = pr.y;
-        var gr = 14 * glowPulse;
+        var gr = 18 * glowPulse;
 
         var g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-        g.addColorStop(0, 'rgba(186, 230, 253, 0.58)');
-        g.addColorStop(0.38, 'rgba(125, 211, 252, 0.22)');
+        g.addColorStop(0, 'rgba(186, 230, 253, 0.62)');
+        g.addColorStop(0.38, 'rgba(125, 211, 252, 0.24)');
         g.addColorStop(1, 'rgba(125, 211, 252, 0)');
 
         ctx.fillStyle = g;
@@ -179,20 +224,20 @@
         ctx.fill();
 
         /* Pulsing ring (breathing halo) */
-        var ringR = 5.2 + 4.8 * ringT;
+        var ringR = 6 + 5.5 * ringT;
         ctx.strokeStyle = 'rgba(186, 230, 253, 0.55)';
-        ctx.lineWidth = 0.55 / scale;
-        ctx.globalAlpha = 0.12 + 0.38 * ringT;
+        ctx.lineWidth = 0.58 / scale;
+        ctx.globalAlpha = 0.14 + 0.4 * ringT;
         ctx.beginPath();
         ctx.arc(gx, gy, ringR, 0, Math.PI * 2);
         ctx.stroke();
         ctx.globalAlpha = 1;
 
-        ctx.fillStyle = 'rgba(255,255,255,0.96)';
+        ctx.fillStyle = 'rgba(255,255,255,0.97)';
         ctx.shadowColor = 'rgba(186, 230, 253, 0.95)';
-        ctx.shadowBlur = (9 + 4 * corePulse) / scale;
+        ctx.shadowBlur = (11 + 5 * corePulse) / scale;
         ctx.beginPath();
-        ctx.arc(gx, gy, 2.65 * corePulse, 0, Math.PI * 2);
+        ctx.arc(gx, gy, 3.25 * corePulse, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -209,6 +254,7 @@
         var t0 = 0;
         var combined;
         var points;
+        var longEdges;
         var prCenter;
 
         function paintLoop(t) {
@@ -223,13 +269,13 @@
                 var ph = (t - t0) * 0.00315;
                 var s = Math.sin(ph);
                 /* Glow + core pulse clearly; ring breathes in sync */
-                glowPulse = 0.84 + 0.26 * s;
-                corePulse = 0.86 + 0.2 * s;
+                glowPulse = 0.8 + 0.3 * s;
+                corePulse = 0.82 + 0.26 * s;
                 ringT = 0.5 + 0.5 * s;
             }
             var ctx = canvas.getContext('2d');
-            if (ctx && combined && points && prCenter) {
-                drawScene(ctx, combined, points, prCenter, glowPulse, corePulse, ringT);
+            if (ctx && combined && points && longEdges && prCenter) {
+                drawScene(ctx, combined, points, longEdges, prCenter, glowPulse, corePulse, ringT);
             }
             if (!reducedMotion) {
                 rafId = requestAnimationFrame(paintLoop);
@@ -263,11 +309,26 @@
                     return;
                 }
 
-                points = samplePoints(combined, TARGET_POINTS, pctx);
+                var nRandom = Math.max(48, TARGET_POINTS - data.ds.length);
+                points = samplePoints(combined, nRandom, pctx);
                 if (points.length < 20) {
                     wrap.style.display = 'none';
                     return;
                 }
+
+                var hi;
+                for (hi = 0; hi < data.ds.length; hi++) {
+                    var hc = bboxCenter(data.ds[hi]);
+                    points.push({
+                        x: hc.x,
+                        y: hc.y,
+                        r: 1.2 + Math.random() * 0.35,
+                        a: 0.58 + Math.random() * 0.22,
+                        hub: true
+                    });
+                }
+
+                longEdges = buildLongRangeEdges(points);
 
                 function resize() {
                     if (rafId) {
@@ -289,7 +350,7 @@
                     }
                     t0 = performance.now();
                     if (reducedMotion) {
-                        drawScene(ctx, combined, points, prCenter, 1, 1, 0.5);
+                        drawScene(ctx, combined, points, longEdges, prCenter, 1, 1, 0.5);
                     } else {
                         startPaint();
                     }
