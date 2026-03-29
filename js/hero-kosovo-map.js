@@ -9,8 +9,8 @@
     var MAX_EDGE_DIST = 50;
     var MAX_NEIGHBORS = 4;
     var LINE_ALPHA = 0.26;
-    /** Zoom past full bleed (cover) so the map reads clearly in the hero */
-    var COVER_ZOOM = 1.18;
+    /** Contain: full country visible inside hero, modest inset from edges */
+    var FIT_INSET = 0.88;
 
     function loadPaths() {
         return fetch('img/kosovo.svg')
@@ -78,11 +78,11 @@
         return pts;
     }
 
-    function drawScene(ctx, combined, points, pr, pulse) {
+    function drawScene(ctx, combined, points, pr, glowPulse, corePulse, ringT) {
         var cw = ctx.canvas._cssW;
         var ch = ctx.canvas._cssH;
         var dpr = ctx.canvas.width / cw;
-        var scale = Math.max(cw / VB_W, ch / VB_H) * COVER_ZOOM;
+        var scale = Math.min(cw / VB_W, ch / VB_H) * FIT_INSET;
         var tx = (cw - VB_W * scale) / 2;
         var ty = (ch - VB_H * scale) / 2;
 
@@ -154,11 +154,11 @@
 
         var gx = pr.x;
         var gy = pr.y;
-        var gr = 14 * pulse;
+        var gr = 14 * glowPulse;
 
         var g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-        g.addColorStop(0, 'rgba(186, 230, 253, 0.5)');
-        g.addColorStop(0.4, 'rgba(125, 211, 252, 0.18)');
+        g.addColorStop(0, 'rgba(186, 230, 253, 0.58)');
+        g.addColorStop(0.38, 'rgba(125, 211, 252, 0.22)');
         g.addColorStop(1, 'rgba(125, 211, 252, 0)');
 
         ctx.fillStyle = g;
@@ -166,11 +166,21 @@
         ctx.arc(gx, gy, gr, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
-        ctx.shadowColor = 'rgba(186, 230, 253, 0.85)';
-        ctx.shadowBlur = 8 / scale;
+        /* Pulsing ring (breathing halo) */
+        var ringR = 5.2 + 4.8 * ringT;
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.55)';
+        ctx.lineWidth = 0.55 / scale;
+        ctx.globalAlpha = 0.12 + 0.38 * ringT;
         ctx.beginPath();
-        ctx.arc(gx, gy, 2.6 * pulse, 0, Math.PI * 2);
+        ctx.arc(gx, gy, ringR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = 'rgba(255,255,255,0.96)';
+        ctx.shadowColor = 'rgba(186, 230, 253, 0.95)';
+        ctx.shadowBlur = (9 + 4 * corePulse) / scale;
+        ctx.beginPath();
+        ctx.arc(gx, gy, 2.65 * corePulse, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -190,10 +200,24 @@
         var prCenter;
 
         function paintLoop(t) {
-            var pulse = reducedMotion ? 1 : 0.92 + Math.sin((t - t0) * 0.0026) * 0.1;
+            var glowPulse;
+            var corePulse;
+            var ringT;
+            if (reducedMotion) {
+                glowPulse = 1;
+                corePulse = 1;
+                ringT = 0.5;
+            } else {
+                var ph = (t - t0) * 0.00315;
+                var s = Math.sin(ph);
+                /* Glow + core pulse clearly; ring breathes in sync */
+                glowPulse = 0.84 + 0.26 * s;
+                corePulse = 0.86 + 0.2 * s;
+                ringT = 0.5 + 0.5 * s;
+            }
             var ctx = canvas.getContext('2d');
             if (ctx && combined && points && prCenter) {
-                drawScene(ctx, combined, points, prCenter, pulse);
+                drawScene(ctx, combined, points, prCenter, glowPulse, corePulse, ringT);
             }
             if (!reducedMotion) {
                 rafId = requestAnimationFrame(paintLoop);
@@ -253,7 +277,7 @@
                     }
                     t0 = performance.now();
                     if (reducedMotion) {
-                        drawScene(ctx, combined, points, prCenter, 1);
+                        drawScene(ctx, combined, points, prCenter, 1, 1, 0.5);
                     } else {
                         startPaint();
                     }
