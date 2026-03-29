@@ -1,16 +1,16 @@
 /**
- * Kosovo "constellation" in hero: thin white lines + nodes inside country clip.
- * Prishtina (XK-PR): brighter pulse. CSS masks the map center so hero text stays readable.
+ * Kosovo in hero: outline stroke + constellation mesh (no area fill).
+ * Prishtina (XK-PR): pulse. Map is scaled to fit inside the hero with equal margin on all sides.
  */
 (function () {
     var VB_W = 612.56158;
     var VB_H = 696.99365;
-    var TARGET_POINTS = 155;
-    var MAX_EDGE_DIST = 50;
-    var MAX_NEIGHBORS = 4;
-    var LINE_ALPHA = 0.26;
-    /** Contain: full country visible inside hero, modest inset from edges */
-    var FIT_INSET = 0.88;
+    var TARGET_POINTS = 168;
+    var MAX_EDGE_DIST = 48;
+    var MAX_NEIGHBORS = 5;
+    var LINE_ALPHA = 0.32;
+    /** Fraction of width/height reserved as empty space on each side (top, bottom, left, right) */
+    var MARGIN_RATIO = 0.075;
 
     function loadPaths() {
         return fetch('img/kosovo.svg')
@@ -82,7 +82,9 @@
         var cw = ctx.canvas._cssW;
         var ch = ctx.canvas._cssH;
         var dpr = ctx.canvas.width / cw;
-        var scale = Math.min(cw / VB_W, ch / VB_H) * FIT_INSET;
+        var innerW = cw * (1 - 2 * MARGIN_RATIO);
+        var innerH = ch * (1 - 2 * MARGIN_RATIO);
+        var scale = Math.min(innerW / VB_W, innerH / VB_H);
         var tx = (cw - VB_W * scale) / 2;
         var ty = (ch - VB_H * scale) / 2;
 
@@ -94,13 +96,23 @@
         ctx.scale(scale, scale);
 
         if (combined) {
+            /* Country outline (lines only — no fill); mesh drawn inside clip */
+            ctx.strokeStyle = 'rgba(224, 245, 255, 0.58)';
+            ctx.lineWidth = 1.85 / scale;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.shadowColor = 'rgba(56, 189, 248, 0.42)';
+            ctx.shadowBlur = 5.5 / scale;
+            ctx.stroke(combined);
+            ctx.shadowBlur = 0;
+
             ctx.save();
             ctx.clip(combined);
         }
 
         ctx.strokeStyle = 'rgba(255,255,255,' + LINE_ALPHA + ')';
-        /* ~1.1px on screen regardless of cover zoom */
-        ctx.lineWidth = 1.12 / scale;
+        ctx.lineWidth = 1.35 / scale;
+        ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
         var drawn = {};

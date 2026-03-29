@@ -531,10 +531,10 @@ h3 {
 @keyframes hero-map-drift {
     0%,
     100% {
-        transform: translateX(-1.5%) translateY(0);
+        transform: translateX(-0.55%) translateY(0);
     }
     50% {
-        transform: translateX(1.5%) translateY(-0.4%);
+        transform: translateX(0.55%) translateY(-0.2%);
     }
 }
 
