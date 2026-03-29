@@ -469,6 +469,42 @@ h3 {
     z-index: 1;
     pointer-events: none;
     overflow: hidden;
+    transform-origin: center center;
+    opacity: 0;
+    transform: scale(1.08);
+}
+
+/* Intro: map appears strong first; then eases back so headline reads clearly */
+@media (prefers-reduced-motion: no-preference) {
+    .hero-map-wrap {
+        animation: hero-map-intro 3.2s cubic-bezier(0.33, 1, 0.36, 1) forwards;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-map-wrap {
+        opacity: 0.9;
+        transform: none;
+        animation: none;
+    }
+}
+
+@keyframes hero-map-intro {
+    0% {
+        opacity: 0;
+        transform: scale(1.08);
+    }
+    26% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    40% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
 }
 
 .hero-kosovo-canvas {
@@ -541,6 +577,28 @@ h3 {
         transparent 74%
     );
     pointer-events: none;
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .hero-content::before {
+        animation: hero-content-vignette 1.05s var(--ease-out) 1s forwards;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-content::before {
+        opacity: 1;
+    }
+}
+
+@keyframes hero-content-vignette {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .hero-title {
@@ -574,36 +632,38 @@ h3 {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+    /* Text follows map intro (~1s); map eases down in opacity while copy staggers in */
     .hero-title-line:nth-child(1) {
-        animation: hero-rise 0.85s var(--ease-out) 0.06s both;
+        animation: hero-rise 0.85s var(--ease-out) 1.05s both;
     }
 
     .hero-title-line:nth-child(2) {
-        animation: hero-rise 0.85s var(--ease-out) 0.2s both;
+        animation: hero-rise 0.85s var(--ease-out) 1.18s both;
     }
 
     .hero-subtitle {
-        animation: hero-rise 0.75s var(--ease-out) 0.34s both;
+        animation: hero-rise 0.75s var(--ease-out) 1.3s both;
     }
 
     .first-time {
-        animation: hero-rise 0.75s var(--ease-out) 0.46s both, hero-badge-pulse 5s ease-in-out infinite 1.2s;
+        animation: hero-rise 0.75s var(--ease-out) 1.42s both,
+            hero-badge-pulse 5s ease-in-out infinite 2.65s;
     }
 
     .hero-lead {
-        animation: hero-rise 0.75s var(--ease-out) 0.56s both;
+        animation: hero-rise 0.75s var(--ease-out) 1.52s both;
     }
 
     .hero-event-meta {
-        animation: hero-rise 0.8s var(--ease-out) 0.66s both;
+        animation: hero-rise 0.8s var(--ease-out) 1.62s both;
     }
 
     .hero-buttons {
-        animation: hero-rise 0.8s var(--ease-out) 0.78s both;
+        animation: hero-rise 0.8s var(--ease-out) 1.72s both;
     }
 
     .hero-partners {
-        animation: hero-rise 0.85s var(--ease-out) 0.9s both;
+        animation: hero-rise 0.85s var(--ease-out) 1.82s both;
     }
 }
 
@@ -640,6 +700,10 @@ h3 {
         animation: none !important;
         opacity: 1;
         transform: none;
+    }
+
+    .hero-content::before {
+        animation: none !important;
     }
 }
 
