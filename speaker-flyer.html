@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600..800;1,600..800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJY0PSJOH/S7JIs5Ls9AQPsYyfs2sf6P0tL4A7PfsKaTupdZxpLH04EE5aqNVikHy4vfCRFURd1dQEBg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="vendor/html2canvas.min.js"></script>
   <style>
     /* Palette from img/layer/global azure event-2.svg (paint0 / paint1 / paint2) */
     :root {
@@ -1083,6 +1083,12 @@
         var fileSlug = slugify(nameForFile);
         if (!fileSlug) fileSlug = 'speaker';
         var filename = 'GlobalAzure-Prishtina-2026-' + fileSlug + '.png';
+
+        if (typeof html2canvas !== 'function') {
+          alert('Could not load the PNG export library. Make sure vendor/html2canvas.min.js exists and refresh the page.');
+          btn.disabled = false;
+          return;
+        }
 
         html2canvas(flyer, {
           scale: 2,
