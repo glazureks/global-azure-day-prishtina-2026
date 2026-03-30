@@ -1094,16 +1094,57 @@
           return;
         }
 
-        /* Detached 1:1 clone — preview’s .flyer-scale-inner transform:scale() breaks rasterizers */
-        var exportWrap = document.createElement('div');
-        exportWrap.setAttribute('aria-hidden', 'true');
-        exportWrap.style.cssText =
-          'position:fixed;left:-10000px;top:0;width:1080px;height:1080px;margin:0;padding:0;overflow:hidden;pointer-events:none;z-index:-1;';
-        var exportRoot = flyer.cloneNode(true);
-        exportRoot.removeAttribute('id');
-        exportRoot.classList.add('flyer--export');
-        exportWrap.appendChild(exportRoot);
-        document.body.appendChild(exportWrap);
+        /*
+          Capture the REAL #flyer (same DOM as preview). Cloning breaks gradients/fonts/logos vs on-screen.
+          Temporarily remove .flyer-scale-inner transform:scale and move preview off-screen so layout is 1:1.
+        */
+        var flyerScale = document.querySelector('.flyer-scale');
+        var flyerScaleInner = document.querySelector('.flyer-scale-inner');
+        var previewWrap = document.querySelector('.preview-wrap');
+        var wrapStyleBefore = flyerScale ? flyerScale.getAttribute('style') : null;
+        var innerStyleBefore = flyerScaleInner ? flyerScaleInner.getAttribute('style') : null;
+        var previewMinHBefore = previewWrap ? previewWrap.style.minHeight : '';
+
+        function applyExportView() {
+          flyer.classList.add('flyer--export');
+          if (flyerScaleInner) {
+            flyerScaleInner.style.setProperty('transform', 'none', 'important');
+          }
+          if (previewWrap && flyerScale) {
+            previewWrap.style.minHeight = flyerScale.offsetHeight + 'px';
+          }
+          if (flyerScale) {
+            flyerScale.style.setProperty('overflow', 'visible', 'important');
+            flyerScale.style.setProperty('max-width', '1080px', 'important');
+            flyerScale.style.setProperty('width', '1080px', 'important');
+            flyerScale.style.setProperty('aspect-ratio', 'auto', 'important');
+            flyerScale.style.setProperty('height', 'auto', 'important');
+            flyerScale.style.setProperty('position', 'fixed', 'important');
+            flyerScale.style.setProperty('left', '-10000px', 'important');
+            flyerScale.style.setProperty('top', '0', 'important');
+            flyerScale.style.setProperty('z-index', '2147483640', 'important');
+            flyerScale.style.setProperty('margin', '0', 'important');
+            flyerScale.style.setProperty('box-shadow', 'none', 'important');
+          }
+        }
+
+        function restoreExportView() {
+          flyer.classList.remove('flyer--export');
+          if (previewWrap) {
+            if (previewMinHBefore) previewWrap.style.minHeight = previewMinHBefore;
+            else previewWrap.style.removeProperty('min-height');
+          }
+          if (flyerScale) {
+            if (wrapStyleBefore === null) flyerScale.removeAttribute('style');
+            else flyerScale.setAttribute('style', wrapStyleBefore);
+          }
+          if (flyerScaleInner) {
+            if (innerStyleBefore === null) flyerScaleInner.removeAttribute('style');
+            else flyerScaleInner.setAttribute('style', innerStyleBefore);
+          }
+        }
+
+        applyExportView();
 
         var commonFetchOpts = {
           cacheBust: true,
@@ -1171,20 +1212,19 @@
             return loadKeyFonts();
           })
           .then(function () {
-            return waitForImages(exportRoot);
+            return waitForImages(flyer);
           })
           .then(function () {
-            return settleLayout(exportRoot);
+            return settleLayout(flyer);
           })
           .then(function () {
             if (typeof htmlToImage.getFontEmbedCSS !== 'function') {
               return Promise.resolve('');
             }
-            /* Full page @font-face so Plus Jakarta / Inter match preview (not only subtree) */
             return htmlToImage
               .getFontEmbedCSS(document.documentElement, commonFetchOpts)
               .catch(function () {
-                return htmlToImage.getFontEmbedCSS(exportRoot, commonFetchOpts);
+                return htmlToImage.getFontEmbedCSS(flyer, commonFetchOpts);
               })
               .catch(function () {
                 return '';
@@ -1204,7 +1244,7 @@
             if (fontCss && String(fontCss).trim().length > 0) {
               opts.fontEmbedCSS = fontCss;
             }
-            return htmlToImage.toPng(exportRoot, opts);
+            return htmlToImage.toPng(flyer, opts);
           })
           .then(function (dataUrl) {
             var link = document.createElement('a');
@@ -1217,9 +1257,7 @@
             alert('Could not create image. Try opening this page via a local web server (not file://) so speaker photos load correctly.');
           })
           .finally(function () {
-            if (exportWrap.parentNode) {
-              exportWrap.parentNode.removeChild(exportWrap);
-            }
+            restoreExportView();
             btn.disabled = false;
           });
       });
