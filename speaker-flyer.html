@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600..800;1,600..800&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/globalazure2026.webp">
+  <link rel="preload" as="image" href="img/aaug_transparentWHITE.png">
+  <link rel="preload" as="image" href="img/ick-white-mainlogo.svg">
   <script src="vendor/html-to-image.min.js"></script>
   <style>
     /* Palette from img/layer/global azure event-2.svg (paint0 / paint1 / paint2) */
@@ -624,28 +627,9 @@
       background-clip: text;
     }
 
+    /* No session text → hide block entirely (preview + PNG) */
     .flyer-session.is-empty {
-      min-height: 56px;
-      padding-top: 8px;
-      padding-bottom: 8px;
-    }
-
-    .flyer-session.is-empty p {
-      display: block;
-      padding: 0;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(200, 230, 255, 0.45);
-      background: none;
-      border: none;
-      border-radius: 0;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      box-shadow: none;
-      -webkit-background-clip: unset;
-      background-clip: unset;
+      display: none !important;
     }
 
     .flyer-photo-block {
@@ -1039,9 +1023,11 @@
         if (text) {
           flyerSessionText.textContent = text;
           flyerSessionWrap.classList.remove('is-empty');
+          flyerSessionWrap.removeAttribute('aria-hidden');
         } else {
-          flyerSessionText.textContent = 'Session title (optional)';
+          flyerSessionText.textContent = '';
           flyerSessionWrap.classList.add('is-empty');
+          flyerSessionWrap.setAttribute('aria-hidden', 'true');
         }
       }
 
@@ -1119,53 +1105,101 @@
         exportWrap.appendChild(exportRoot);
         document.body.appendChild(exportWrap);
 
-        var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+        var commonFetchOpts = {
+          cacheBust: true,
+          includeQueryParams: true,
+          fetchRequestInit: { mode: 'cors', credentials: 'omit' }
+        };
+
+        function loadKeyFonts() {
+          if (!document.fonts || !document.fonts.load) return Promise.resolve();
+          var PJ = '"Plus Jakarta Sans"';
+          return Promise.all([
+            document.fonts.load('800 62px ' + PJ),
+            document.fonts.load('800 54px ' + PJ),
+            document.fonts.load('800 46px ' + PJ),
+            document.fonts.load('600 32px ' + PJ),
+            document.fonts.load('400 24px ' + PJ),
+            document.fonts.load('600 27px Inter'),
+            document.fonts.load('700 15px ' + PJ)
+          ]).catch(function () {});
+        }
 
         function waitForImages(root) {
           var imgs = root.querySelectorAll('img');
           var pending = [];
           for (var i = 0; i < imgs.length; i++) {
-            if (imgs[i].complete) continue;
-            pending.push(
-              new Promise(function (resolve) {
-                imgs[i].addEventListener('load', resolve, { once: true });
-                imgs[i].addEventListener('error', resolve, { once: true });
-              })
-            );
+            (function (img) {
+              pending.push(
+                new Promise(function (resolve) {
+                  function done() {
+                    if (img.decode) {
+                      img.decode().then(resolve).catch(resolve);
+                    } else {
+                      resolve();
+                    }
+                  }
+                  if (img.complete) {
+                    done();
+                  } else {
+                    img.addEventListener('load', done, { once: true });
+                    img.addEventListener('error', resolve, { once: true });
+                  }
+                })
+              );
+            })(imgs[i]);
           }
           return Promise.all(pending);
         }
 
+        function settleLayout(el) {
+          void el.offsetWidth;
+          el.getBoundingClientRect();
+          return new Promise(function (resolve) {
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                setTimeout(resolve, 280);
+              });
+            });
+          });
+        }
+
+        var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+
         fontsReady
+          .then(function () {
+            return loadKeyFonts();
+          })
           .then(function () {
             return waitForImages(exportRoot);
           })
           .then(function () {
-            return new Promise(function (resolve) {
-              requestAnimationFrame(function () {
-                requestAnimationFrame(resolve);
-              });
-            });
+            return settleLayout(exportRoot);
           })
           .then(function () {
             if (typeof htmlToImage.getFontEmbedCSS !== 'function') {
               return Promise.resolve('');
             }
-            return htmlToImage.getFontEmbedCSS(exportRoot, {
-              cacheBust: true,
-              includeQueryParams: true
-            }).catch(function () {
-              return '';
-            });
+            /* Full page @font-face so Plus Jakarta / Inter match preview (not only subtree) */
+            return htmlToImage
+              .getFontEmbedCSS(document.documentElement, commonFetchOpts)
+              .catch(function () {
+                return htmlToImage.getFontEmbedCSS(exportRoot, commonFetchOpts);
+              })
+              .catch(function () {
+                return '';
+              });
           })
           .then(function (fontCss) {
+            var pr = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
             var opts = {
-              pixelRatio: 2,
+              pixelRatio: pr,
               cacheBust: true,
               includeQueryParams: true,
               skipAutoScale: true,
               skipFonts: false,
-              preferredFontFormat: 'woff2'
+              preferredFontFormat: 'woff2',
+              fetchRequestInit: commonFetchOpts.fetchRequestInit
             };
             if (fontCss && String(fontCss).trim().length > 0) {
               opts.fontEmbedCSS = fontCss;
