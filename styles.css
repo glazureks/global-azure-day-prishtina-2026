@@ -2209,6 +2209,12 @@ a.hero-meta-link.hero-meta-text:focus-visible {
     }
 }
 
+@media (max-width: 640px) {
+    .speakers-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
     .navbar-container {
         min-height: auto;
