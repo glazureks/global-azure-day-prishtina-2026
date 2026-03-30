@@ -361,7 +361,10 @@
         linear-gradient(160deg, #042a5c 0%, #0c4da0 32%, #1462cd 55%, #061a3d 100%);
     }
 
-    /* PNG export clone only: snapshot libs can’t paint backdrop-filter — keep same look with opaque glass */
+    /*
+      PNG export: foreignObject can’t paint backdrop-filter. Keep the *same* base gradients
+      as .flyer-identity / .flyer-meta-item — only blur is dropped so colours match preview.
+    */
     .flyer.flyer--export .flyer-identity,
     .flyer.flyer--export .flyer-meta-item {
       backdrop-filter: none;
@@ -369,16 +372,11 @@
     }
 
     .flyer.flyer--export .flyer-identity {
-      background: linear-gradient(
-        165deg,
-        rgba(255, 255, 255, 0.2) 0%,
-        rgba(255, 255, 255, 0.07) 42%,
-        rgba(0, 45, 100, 0.75) 100%
-      );
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(0, 40, 90, 0.35) 100%);
     }
 
     .flyer.flyer--export .flyer-meta-item {
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.09) 100%);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%);
     }
 
     .flyer::before {
@@ -1123,7 +1121,25 @@
 
         var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
 
+        function waitForImages(root) {
+          var imgs = root.querySelectorAll('img');
+          var pending = [];
+          for (var i = 0; i < imgs.length; i++) {
+            if (imgs[i].complete) continue;
+            pending.push(
+              new Promise(function (resolve) {
+                imgs[i].addEventListener('load', resolve, { once: true });
+                imgs[i].addEventListener('error', resolve, { once: true });
+              })
+            );
+          }
+          return Promise.all(pending);
+        }
+
         fontsReady
+          .then(function () {
+            return waitForImages(exportRoot);
+          })
           .then(function () {
             return new Promise(function (resolve) {
               requestAnimationFrame(function () {
@@ -1132,13 +1148,29 @@
             });
           })
           .then(function () {
-            return htmlToImage.toPng(exportRoot, {
+            if (typeof htmlToImage.getFontEmbedCSS !== 'function') {
+              return Promise.resolve('');
+            }
+            return htmlToImage.getFontEmbedCSS(exportRoot, {
+              cacheBust: true,
+              includeQueryParams: true
+            }).catch(function () {
+              return '';
+            });
+          })
+          .then(function (fontCss) {
+            var opts = {
               pixelRatio: 2,
               cacheBust: true,
               includeQueryParams: true,
               skipAutoScale: true,
-              skipFonts: false
-            });
+              skipFonts: false,
+              preferredFontFormat: 'woff2'
+            };
+            if (fontCss && String(fontCss).trim().length > 0) {
+              opts.fontEmbedCSS = fontCss;
+            }
+            return htmlToImage.toPng(exportRoot, opts);
           })
           .then(function (dataUrl) {
             var link = document.createElement('a');
