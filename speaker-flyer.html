@@ -297,6 +297,44 @@
       cursor: not-allowed;
     }
 
+    .btn-download-pdf {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-family: "Plus Jakarta Sans", Inter, sans-serif;
+      font-weight: 700;
+      font-size: max(15px, 0.92rem);
+      color: var(--text);
+      cursor: pointer;
+      border: 1px solid rgba(20, 98, 205, 0.55);
+      border-radius: 12px;
+      background: rgba(10, 40, 90, 0.45);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .btn-download-pdf:hover:not(:disabled) {
+        border-color: rgba(100, 180, 255, 0.65);
+        background: rgba(20, 80, 160, 0.35);
+      }
+    }
+
+    .btn-download-pdf:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-download-pdf:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(20, 98, 205, 0.28);
+    }
+
     .preview-wrap {
       display: flex;
       flex-direction: column;
@@ -777,7 +815,7 @@
   <div class="app">
     <header class="app-header">
       <h1>Speaker flyer generator</h1>
-      <p>Choose a speaker from the event site list, edit fields as needed, then download a ZIP with the flyer HTML (1080×1080) and all <code style="font-size:0.9em">img/</code> assets so it opens offline after extract.</p>
+      <p>Choose a speaker, edit fields as needed, then download a <strong>ZIP</strong> (HTML + images), or use <strong>Print → Save as PDF</strong> for real HTML (text/vectors, not a flat screenshot).</p>
     </header>
 
     <div class="layout">
@@ -821,6 +859,10 @@
         <button type="button" class="btn-download" id="btn-download">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download ZIP
+        </button>
+        <button type="button" class="btn-download-pdf" id="btn-download-pdf" aria-label="Open print dialog to save flyer as PDF from HTML">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><path d="M6 14h12v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-8z"/></svg>
+          Print → Save as PDF
         </button>
       </aside>
 
@@ -931,6 +973,7 @@
       var photoResetBtn = document.getElementById('photo-reset-btn');
       var photoPickerStatus = document.getElementById('photo-picker-status');
       var btn = document.getElementById('btn-download');
+      var btnPdf = document.getElementById('btn-download-pdf');
       var flyer = document.getElementById('flyer');
       var flyerPhoto = document.getElementById('flyer-photo');
       var flyerName = document.getElementById('flyer-name');
@@ -958,6 +1001,15 @@
 
       function slugify(name) {
         return name.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+      }
+
+      function getExportSlug() {
+        var si = parseInt(select.value, 10);
+        var sp = SPEAKERS[si];
+        var nameForFile = nameInput.value.trim() || (sp && sp.name) || 'speaker';
+        var fileSlug = slugify(nameForFile);
+        if (!fileSlug) fileSlug = 'speaker';
+        return { nameForFile: nameForFile, fileSlug: fileSlug };
       }
 
       function updateIdentity() {
@@ -1055,6 +1107,83 @@
 
       applySpeaker(0);
       updateMetaDateTime();
+
+      function blobToDataURL(blob) {
+        return new Promise(function (res, rej) {
+          var fr = new FileReader();
+          fr.onload = function () {
+            res(fr.result);
+          };
+          fr.onerror = rej;
+          fr.readAsDataURL(blob);
+        });
+      }
+
+      /** Full HTML document with embedded image data URLs (for print / Save as PDF, no canvas). */
+      function buildFlyerHtmlWithEmbeddedImages() {
+        var css = getFlyerLayerCss();
+        var clone = flyer.cloneNode(true);
+        clone.removeAttribute('aria-label');
+        var assets;
+        try {
+          assets = buildZipImageAssets(clone);
+        } catch (e) {
+          return Promise.reject(e);
+        }
+        var paths = Object.keys(assets);
+        return Promise.all(
+          paths.map(function (p) {
+            return assets[p].then(blobToDataURL).then(function (du) {
+              return { path: p, du: du };
+            });
+          })
+        ).then(function (pairs) {
+          var map = {};
+          pairs.forEach(function (x) {
+            map[x.path] = x.du;
+          });
+          var imgs = clone.querySelectorAll('img');
+          for (var i = 0; i < imgs.length; i++) {
+            var s = imgs[i].getAttribute('src');
+            if (s && map[s]) imgs[i].setAttribute('src', map[s]);
+          }
+          var ex = getExportSlug();
+          var titleSafe = ex.nameForFile
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/"/g, '&quot;');
+          var fontsHref =
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600..800;1,600..800&display=swap';
+          var printCss =
+            '@media print{@page{margin:0;size:286mm 286mm}body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.flyer{width:1080px!important;height:1080px!important}}';
+          return (
+            '<!DOCTYPE html>\n' +
+            '<html lang="en">\n' +
+            '<head>\n' +
+            '<meta charset="UTF-8">\n' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+            '<meta name="color-scheme" content="dark">\n' +
+            '<title>' +
+            titleSafe +
+            ' — Global Azure Prishtina 2026</title>\n' +
+            '<link rel="preconnect" href="https://fonts.googleapis.com">\n' +
+            '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' +
+            '<link rel="stylesheet" href="' +
+            fontsHref +
+            '">\n' +
+            '<style>\n' +
+            css +
+            '\n' +
+            printCss +
+            '\n</style>\n' +
+            '</head>\n' +
+            '<body>\n' +
+            clone.outerHTML +
+            '\n</body>\n' +
+            '</html>'
+          );
+        });
+      }
 
       function getFlyerLayerCss() {
         var styleEl = document.querySelector('head > style');
@@ -1171,12 +1300,9 @@
         }
 
         btn.disabled = true;
-        var si = parseInt(select.value, 10);
-        var sp = SPEAKERS[si];
-        var nameForFile = nameInput.value.trim() || (sp && sp.name) || 'speaker';
-        var fileSlug = slugify(nameForFile);
-        if (!fileSlug) fileSlug = 'speaker';
-        var zipName = 'GlobalAzure-Prishtina-2026-' + fileSlug + '.zip';
+        var ex = getExportSlug();
+        var nameForFile = ex.nameForFile;
+        var zipName = 'GlobalAzure-Prishtina-2026-' + ex.fileSlug + '.zip';
 
         var css = getFlyerLayerCss();
         var clone = flyer.cloneNode(true);
@@ -1252,6 +1378,50 @@
           })
           .finally(function () {
             btn.disabled = false;
+          });
+      });
+
+      btnPdf.addEventListener('click', function () {
+        btnPdf.disabled = true;
+        buildFlyerHtmlWithEmbeddedImages()
+          .then(function (htmlDoc) {
+            var iframe = document.createElement('iframe');
+            iframe.setAttribute('title', 'Flyer — print to PDF');
+            iframe.style.cssText =
+              'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;visibility:hidden;';
+            document.body.appendChild(iframe);
+            var win = iframe.contentWindow;
+            var idoc = iframe.contentDocument;
+            idoc.open();
+            idoc.write(htmlDoc);
+            idoc.close();
+            var removed = false;
+            var cleanup = function () {
+              if (!removed && iframe.parentNode) {
+                removed = true;
+                iframe.parentNode.removeChild(iframe);
+              }
+            };
+            win.addEventListener('afterprint', cleanup);
+            setTimeout(function () {
+              try {
+                win.focus();
+                win.print();
+              } catch (e) {
+                cleanup();
+                throw e;
+              }
+              setTimeout(cleanup, 2500);
+            }, 500);
+          })
+          .catch(function (err) {
+            console.error(err);
+            alert(
+              'Could not open print view. Serve the page over HTTP(S) so images load. In the print dialog, pick “Save as PDF” (or Microsoft Print to PDF).'
+            );
+          })
+          .finally(function () {
+            btnPdf.disabled = false;
           });
       });
     })();
