@@ -11,7 +11,7 @@
   <link rel="preload" as="image" href="img/globalazure2026.webp">
   <link rel="preload" as="image" href="img/aaug_transparentWHITE.png">
   <link rel="preload" as="image" href="img/ick-white-mainlogo.svg">
-  <script src="vendor/html-to-image.min.js"></script>
+  <script src="vendor/modern-screenshot.js"></script>
   <style>
     /* Palette from img/layer/global azure event-2.svg (paint0 / paint1 / paint2) */
     :root {
@@ -1088,8 +1088,8 @@
         if (!fileSlug) fileSlug = 'speaker';
         var filename = 'GlobalAzure-Prishtina-2026-' + fileSlug + '.png';
 
-        if (typeof htmlToImage === 'undefined' || typeof htmlToImage.toPng !== 'function') {
-          alert('Could not load the PNG export library. Make sure vendor/html-to-image.min.js exists and refresh the page.');
+        if (typeof modernScreenshot === 'undefined' || typeof modernScreenshot.domToPng !== 'function') {
+          alert('Could not load the PNG export library. Make sure vendor/modern-screenshot.js exists and refresh the page.');
           btn.disabled = false;
           return;
         }
@@ -1145,12 +1145,6 @@
         }
 
         applyExportView();
-
-        var commonFetchOpts = {
-          cacheBust: true,
-          includeQueryParams: true,
-          fetchRequestInit: { mode: 'cors', credentials: 'omit' }
-        };
 
         function loadKeyFonts() {
           if (!document.fonts || !document.fonts.load) return Promise.resolve();
@@ -1218,33 +1212,15 @@
             return settleLayout(flyer);
           })
           .then(function () {
-            if (typeof htmlToImage.getFontEmbedCSS !== 'function') {
-              return Promise.resolve('');
-            }
-            return htmlToImage
-              .getFontEmbedCSS(document.documentElement, commonFetchOpts)
-              .catch(function () {
-                return htmlToImage.getFontEmbedCSS(flyer, commonFetchOpts);
-              })
-              .catch(function () {
-                return '';
-              });
-          })
-          .then(function (fontCss) {
-            var pr = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
-            var opts = {
-              pixelRatio: pr,
-              cacheBust: true,
-              includeQueryParams: true,
-              skipAutoScale: true,
-              skipFonts: false,
-              preferredFontFormat: 'woff2',
-              fetchRequestInit: commonFetchOpts.fetchRequestInit
-            };
-            if (fontCss && String(fontCss).trim().length > 0) {
-              opts.fontEmbedCSS = fontCss;
-            }
-            return htmlToImage.toPng(flyer, opts);
+            var scale = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
+            return modernScreenshot.domToPng(flyer, {
+              scale: scale,
+              timeout: 120000,
+              fetch: {
+                bypassingCache: true,
+                requestInit: { mode: 'cors', credentials: 'omit' }
+              }
+            });
           })
           .then(function (dataUrl) {
             var link = document.createElement('a');
