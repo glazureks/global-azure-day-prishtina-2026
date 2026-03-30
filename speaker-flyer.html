@@ -361,6 +361,26 @@
         linear-gradient(160deg, #042a5c 0%, #0c4da0 32%, #1462cd 55%, #061a3d 100%);
     }
 
+    /* Off-screen export clone: html2canvas breaks on ancestor transform:scale + backdrop-filter */
+    .flyer.flyer--export .flyer-identity,
+    .flyer.flyer--export .flyer-meta-item {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .flyer.flyer--export .flyer-identity {
+      background: linear-gradient(
+        165deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.07) 42%,
+        rgba(0, 45, 100, 0.75) 100%
+      );
+    }
+
+    .flyer.flyer--export .flyer-meta-item {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.09) 100%);
+    }
+
     .flyer::before {
       content: "";
       position: absolute;
@@ -1090,23 +1110,68 @@
           return;
         }
 
-        html2canvas(flyer, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: null,
-          logging: false
-        }).then(function (canvas) {
-          var link = document.createElement('a');
-          link.download = filename;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-        }).catch(function (err) {
-          console.error(err);
-          alert('Could not create image. Try opening this page via a local web server (not file://) so speaker photos load correctly.');
-        }).finally(function () {
-          btn.disabled = false;
-        });
+        /* Capture a detached 1080×1080 clone — parent .flyer-scale-inner transform:scale() corrupts text metrics in html2canvas */
+        var exportWrap = document.createElement('div');
+        exportWrap.setAttribute('aria-hidden', 'true');
+        exportWrap.style.cssText =
+          'position:fixed;left:-10000px;top:0;width:1080px;height:1080px;margin:0;padding:0;overflow:hidden;pointer-events:none;z-index:-1;';
+        var exportRoot = flyer.cloneNode(true);
+        exportRoot.removeAttribute('id');
+        exportRoot.classList.add('flyer--export');
+        exportWrap.appendChild(exportRoot);
+        document.body.appendChild(exportWrap);
+
+        var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+
+        fontsReady
+          .then(function () {
+            return new Promise(function (resolve) {
+              requestAnimationFrame(function () {
+                requestAnimationFrame(resolve);
+              });
+            });
+          })
+          .then(function () {
+            return html2canvas(exportRoot, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: false,
+              backgroundColor: null,
+              logging: false,
+              imageTimeout: 20000,
+              onclone: function (clonedDoc, cloned) {
+                var root = cloned;
+                if (!root && clonedDoc && clonedDoc.querySelector) {
+                  root = clonedDoc.querySelector('.flyer.flyer--export') || clonedDoc.querySelector('.flyer');
+                }
+                if (!root || !root.querySelectorAll) return;
+                var all = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
+                for (var i = 0; i < all.length; i++) {
+                  var el = all[i];
+                  if (el.style) {
+                    el.style.setProperty('backdrop-filter', 'none', 'important');
+                    el.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+                  }
+                }
+              }
+            });
+          })
+          .then(function (canvas) {
+            var link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          })
+          .catch(function (err) {
+            console.error(err);
+            alert('Could not create image. Try opening this page via a local web server (not file://) so speaker photos load correctly.');
+          })
+          .finally(function () {
+            if (exportWrap.parentNode) {
+              exportWrap.parentNode.removeChild(exportWrap);
+            }
+            btn.disabled = false;
+          });
       });
     })();
   </script>
