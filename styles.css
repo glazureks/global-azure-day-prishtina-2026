@@ -2209,7 +2209,7 @@ a.hero-meta-link.hero-meta-text:focus-visible {
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .speakers-grid {
         grid-template-columns: 1fr;
     }
