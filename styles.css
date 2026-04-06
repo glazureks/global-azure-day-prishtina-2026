@@ -1623,27 +1623,28 @@ a.hero-meta-link.hero-meta-text:focus-visible {
 }
 
 .schedule-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 18px;
-    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 980px;
+    margin: 0 auto;
 }
 
 .schedule-item {
     background: linear-gradient(165deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
     backdrop-filter: blur(14px) saturate(1.2);
     -webkit-backdrop-filter: blur(14px) saturate(1.2);
-    padding: 1.5rem 1.125rem;
+    padding: 1rem 1.125rem;
     border-radius: var(--radius-md);
     border: 1px solid rgba(125, 211, 252, 0.22);
-    border-top: 3px solid rgba(56, 189, 248, 0.75);
+    border-left: 3px solid rgba(56, 189, 248, 0.75);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), background 0.35s var(--ease-out),
-        border-top-color 0.35s var(--ease-out);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+        border-left-color 0.35s var(--ease-out);
+    display: grid;
+    grid-template-columns: 104px 1fr;
+    gap: 16px;
+    align-items: start;
     position: relative;
 }
 
@@ -1652,12 +1653,12 @@ a.hero-meta-link.hero-meta-text:focus-visible {
         content: '';
         position: absolute;
         left: 0;
-        right: 0;
+        bottom: 0;
         top: 0;
-        height: 3px;
-        border-radius: var(--radius-md) var(--radius-md) 0 0;
-        background: linear-gradient(90deg, #38bdf8, #7dd3fc, #a5f3fc, #38bdf8);
-        background-size: 200% 100%;
+        width: 3px;
+        border-radius: var(--radius-md) 0 0 var(--radius-md);
+        background: linear-gradient(180deg, #38bdf8, #7dd3fc, #a5f3fc, #38bdf8);
+        background-size: 100% 200%;
         opacity: 0;
         transition: opacity 0.35s var(--ease-out);
         pointer-events: none;
@@ -1665,9 +1666,9 @@ a.hero-meta-link.hero-meta-text:focus-visible {
     }
 
     .schedule-item:hover {
-        transform: translateY(-5px);
+        transform: translateY(-2px);
         background: linear-gradient(165deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
-        border-top-color: transparent;
+        border-left-color: transparent;
         box-shadow: 0 20px 56px rgba(0, 40, 90, 0.45), 0 8px 32px rgba(56, 189, 248, 0.15),
             inset 0 1px 0 rgba(255, 255, 255, 0.14);
     }
@@ -1678,30 +1679,87 @@ a.hero-meta-link.hero-meta-text:focus-visible {
 }
 
 .time {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: linear-gradient(135deg, var(--azure-brand) 0%, var(--azure-400) 100%);
     color: #fff;
     padding: 8px 16px;
     border-radius: var(--radius-sm);
     font-weight: 700;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-family: var(--font-display);
-    margin-bottom: 0.875rem;
+    margin-top: 2px;
     box-shadow: 0 4px 16px rgba(0, 99, 177, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 86px;
 }
 
 .schedule-item h3 {
     font-size: 1.0625rem;
     color: var(--ice-100);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
     font-weight: 700;
+    text-align: left;
 }
 
-.schedule-item p {
+.schedule-content {
+    min-width: 0;
+}
+
+.schedule-meta {
     color: #94a3b8;
     font-size: 0.875rem;
     line-height: 1.5;
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.session-expand {
+    margin-top: 0.65rem;
+}
+
+.session-expand summary {
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--ice-100);
+    font-weight: 600;
+    font-size: 0.835rem;
+    border: 1px solid rgba(125, 211, 252, 0.35);
+    border-radius: var(--radius-pill);
+    padding: 6px 12px;
+    transition: background 0.25s var(--ease-out), color 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+}
+
+.session-expand summary::-webkit-details-marker {
+    display: none;
+}
+
+.session-expand summary::before {
+    content: '+';
+    font-size: 0.95rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.session-expand[open] summary {
+    background: rgba(125, 211, 252, 0.16);
+    border-color: rgba(165, 243, 252, 0.7);
+}
+
+.session-expand[open] summary::before {
+    content: '-';
+}
+
+.session-expand > p {
+    margin: 0.6rem 0 0;
+    color: var(--ice-200);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    text-align: left;
 }
 
 /* Supporters */
@@ -2309,8 +2367,13 @@ a.hero-meta-link.hero-meta-text:focus-visible {
         min-height: 280px;
     }
 
-    .schedule-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .schedule-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .time {
+        justify-self: start;
     }
 
     .countdown {
@@ -2358,8 +2421,8 @@ a.hero-meta-link.hero-meta-text:focus-visible {
         max-width: 220px;
     }
 
-    .schedule-grid {
-        grid-template-columns: 1fr;
+    .schedule-item {
+        padding: 0.95rem;
     }
 
     .speaker-photo-wrap {
